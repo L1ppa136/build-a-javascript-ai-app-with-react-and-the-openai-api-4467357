@@ -10,6 +10,7 @@ function App() {
   const [units, setUnits] = useState("metric");
   const [weatherDataLoading, setWeatherDataLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [weatherDescriptionLoading, setWeatherDescriptionLoading] = useState(false);
 
   // Custom hook to handle API requests. Fires when prompt changes.
   const { error, promptData, locationData, weatherData, weatherDescription } = useApiRequests(prompt);
@@ -29,6 +30,13 @@ function App() {
     }
   }, [weatherData]);
 
+    // Set weatherDataLoading to false when weatherData is returned from API request.
+  useEffect(() => {
+    if (weatherDescription) {
+      setWeatherDescriptionLoading(false);
+    }
+  }, [weatherDescription]);
+
   //Set units according to the location
   useEffect(() => {
     if(promptData && promptData.units){
@@ -40,18 +48,26 @@ function App() {
   const handleSubmit = (newPrompt) => {
     setErrorMsg("");
     setWeatherDataLoading(true);
+    setWeatherDescriptionLoading(true);
     setPrompt(newPrompt);
   };
 
   return (
-    <div className="container">
-      <header className="header">
-        <h1 className="page-title">Current Weather</h1>
+    <div className='container'>
+      <header className='header'>
+        <h1 className='page-title'>Current Weather</h1>
         <WeatherForm onSubmit={handleSubmit} />
-        {error && <p className="error">{errorMsg.message}</p>}
-        {weatherDescription ? (<Description weatherDescription={weatherDescription}/>) : (<Description/>)}
+        {error && <p className='error'>{errorMsg.message}</p>}
+        {weatherDescription ? (
+          <Description
+            weatherDescription={weatherDescription}
+            isLoading={weatherDescriptionLoading}
+          />
+        ) : (
+          <Description isLoading={weatherDescriptionLoading} />
+        )}
       </header>
-      <main className="main-content">
+      <main className='main-content'>
         {weatherData.name && !errorMsg ? (
           <WeatherCard
             isLoading={weatherDataLoading}
